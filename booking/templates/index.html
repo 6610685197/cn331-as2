@@ -1,6 +1,8 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
-{% block title %}Homepage{% endblock %}
+{% block title %}
+  Homepage
+{% endblock %}
 
 {% block content %}
   <!-- Hero Section -->
@@ -9,41 +11,43 @@
     <p class="mt-4 text-gray-600">Reserve a study room</p>
   </section>
 
+  <!-- Date Picker -->
+  <section class="max-w-6xl mx-auto py-6">
+    <form method="get" class="flex items-center space-x-4">
+      <label for="date" class="font-medium text-gray-700">Select Date:</label>
+      <input type="date" id="date" name="date" value="{{ selected_date|date:'Y-m-d' }}" min="{{ today|date:'Y-m-d' }}" max="{{ max_date|date:'Y-m-d' }}" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-700" />
+      <button type="submit" class="bg-red-700 text-white px-4 py-2 rounded-lg hover:bg-red-800">Show</button>
+    </form>
+  </section>
+
   <!-- Rooms Section -->
   <section id="rooms" class="max-w-6xl mx-auto py-12">
-    <h3 class="text-2xl font-semibold mb-6">Available Rooms</h3>
+    <h3 class="text-2xl font-semibold mb-6">Available Rooms for {{ selected_date|date:'F j, Y' }}</h3>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       {% for room in rooms %}
-      <div class="bg-white rounded-2xl shadow p-6">
-        <h4 class="text-xl font-bold">{{ room.name }}</h4>
-        <p class="text-gray-600 mt-2">Capacity: {{ room.capacity }} people</p>
+        <div class="bg-white rounded-2xl shadow p-6">
+          <h4 class="text-xl font-bold">{{ room.name }} ({{ room.number }})</h4>
+          <p class="text-gray-600 mt-2">Capacity: {{ room.capacity }} people</p>
 
-        {% if room.is_open %}
-        <form method="post" class="mt-2">
-            {% csrf_token %}
-            <input type="hidden" name="room_id" value="{{ room.id }}">
-            <label class="block text-sm mt-2">
-                Start Time:
-                <input type="datetime-local" name="start_time" required class="border p-1 rounded w-full">
-            </label>
-            <label class="block text-sm mt-2">
-                End Time:
-                <input type="datetime-local" name="end_time" required class="border p-1 rounded w-full">
-            </label>
-            <button type="submit"
-                class="mt-4 bg-red-700 text-white px-4 py-2 rounded-xl hover:bg-red-800">
-                Book Now
-            </button>
-        </form>
-        {% else %}
-        <p class="text-red-600 font-medium mt-2">Fully Booked</p>
-        <button class="mt-4 bg-gray-400 text-white px-4 py-2 rounded-xl cursor-not-allowed">
-            Not Available
-        </button>
-        {% endif %}
-      </div>
-      {% empty %}
-      <p>No rooms available right now.</p>
+          <div class="mt-4 space-y-3">
+            {% for session in room.sessions %}
+              <div class="flex justify-between items-center">
+                <span class="font-medium">{{ session.label }}</span>
+                {% if session.is_booked %}
+                  <button class="bg-gray-400 text-white px-3 py-1 rounded cursor-not-allowed">Booked</button>
+                {% else %}
+                  <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="room_id" value="{{ room.id }}" />
+                    <input type="hidden" name="date" value="{{ selected_date|date:'Y-m-d' }}" />
+                    <input type="hidden" name="session" value="{{ session.id }}" />
+                    <button type="submit" class="bg-red-700 text-white px-3 py-1 rounded hover:bg-red-800">Book</button>
+                  </form>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
       {% endfor %}
     </div>
   </section>
