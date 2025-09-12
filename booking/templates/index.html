@@ -11,6 +11,23 @@
     <p class="mt-4 text-gray-600">Reserve a study room</p>
   </section>
 
+  {% if messages %}
+    <div class="max-w-4xl mx-auto mt-4">
+      {% for message in messages %}
+        <div class="p-3 rounded-lg mb-2 shadow-md
+        {% if message.tags == 'success' %}
+             bg-green-100 text-green-800 border border-green-300
+
+          {% elif message.tags == 'error' %}
+             bg-red-100 text-red-800 border border-red-300
+
+          {% else %}
+             bg-gray-100 text-gray-800 border border-gray-300
+          {% endif %}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
   <!-- Date Picker -->
   <section class="max-w-6xl mx-auto py-6">
     <form method="get" class="flex items-center space-x-4">
@@ -41,7 +58,7 @@
                     <input type="hidden" name="room_id" value="{{ room.id }}" />
                     <input type="hidden" name="date" value="{{ selected_date|date:'Y-m-d' }}" />
                     <input type="hidden" name="session" value="{{ session.id }}" />
-                    <button type="submit" class="bg-red-700 text-white px-3 py-1 rounded hover:bg-red-800">Book</button>
+                    <button type="submit" class="bg-red-700 text-white px-3 py-1 rounded hover:bg-red-800" onclick="return confirm('Are you sure you want to book this room?');">Book</button>
                   </form>
                 {% endif %}
               </div>
