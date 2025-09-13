@@ -16,6 +16,9 @@
             <nav>
                 <a href="{% url 'booking:index' %}" class="px-4 hover:underline">Home</a>
                 {% if user.is_authenticated %}
+                    {% if user.is_staff %}
+                    <a href="{% url 'booking:admin_dashboard' %}" class="px-4 hover:underline">Admin dashboard</a>
+                    {% endif %}
                 <a href="{% url 'booking:my-bookings' %}" class="px-4 hover:underline">My Bookings</a>
                 <form method="post" action="{% url 'booking:logout' %}" class="inline">
                     {% csrf_token %}

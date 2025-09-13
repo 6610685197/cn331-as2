@@ -8,7 +8,11 @@
   <!-- Hero Section -->
   <section class="text-center py-16 bg-white shadow">
     <h2 class="text-4xl font-bold text-gray-800">Book Your Study Room</h2>
-    <p class="mt-4 text-gray-600">Reserve a study room</p>
+    {% if user.is_authenticated %}
+      <p class="mt-4 text-gray-600">Hi, {{ request.user.first_name|default:request.user.username }}</p>
+    {% else %}
+      <p class="mt-4 text-gray-600">Login to reserve a room {{ request.user.first_name|default:request.user.username }}</p>
+    {% endif %}
   </section>
 
   {% if messages %}

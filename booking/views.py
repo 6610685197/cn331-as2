@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth import login as auth_login, authenticate
 from django.contrib.auth.forms import UserCreationForm , AuthenticationForm
 from django.contrib import messages
 from django.utils import timezone
@@ -103,9 +105,21 @@ def authView(request):
         form = UserCreationForm()
     return render(request, "registration/signup.html", {"form" : form})
 
- #def login_view(request):
-    #form = AuthenticationForm()
-    #return render(request, "registration/signup.html", {"form": form})
+def login_view(request):
+    if request.method == "POST":
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            auth_login(request, user)
+
+            # Redirect admin to dashboard, normal users to index
+            if user.is_staff:
+                return redirect('booking:admin_dashboard')
+            else:
+                return redirect('booking:index')
+    else:
+        form = AuthenticationForm()
+    return render(request, "registration/login.html", {"form": form})
 
 @login_required(login_url='booking:login')
 def my_bookings(request):
@@ -121,3 +135,33 @@ def my_bookings(request):
 
         return render(request, "my_bookings.html", {"bookings": bookings})
     return render(request, "my_bookings.html", {"bookings": bookings})
+
+@staff_member_required
+def admin_dashboard(request):
+    rooms = Room.objects.all().order_by("number")
+    bookings = Booking.objects.select_related("user", "room").order_by("-start_time")
+
+    # Toggle room
+    if request.method == "POST":
+        if "toggle_room" in request.POST:
+            room_id = request.POST.get("room_id")
+            room = get_object_or_404(Room, id=room_id)
+            room.is_open = not room.is_open
+            room.save()
+            messages.success(request, f"{room.name} is now {'open' if room.is_open else 'closed'}.")
+            return redirect("booking:admin_dashboard")
+        
+    # Delete booking
+        if "delete_booking" in request.POST:
+            booking_id = request.POST.get("booking_id")
+            booking = get_object_or_404(Booking, id=booking_id)
+            date_str = booking.start_time.strftime("%Y-%m-%d")
+            time_str = f"{booking.start_time.strftime('%H:%M')} – {booking.end_time.strftime('%H:%M')}"
+            booking.delete()
+            messages.success(request, f"Booking for {booking.room.name} by {booking.user.username} on {date_str} at {time_str} has been deleted.")
+            return redirect("booking:admin_dashboard")
+
+    return render(request, "admin_dashboard.html", {
+        "rooms": rooms,
+        "bookings": bookings,
+    })
