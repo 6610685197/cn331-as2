@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib import messages
 from django.utils import timezone
+from django.urls import reverse
 from datetime import datetime, timedelta
 from .models import Room, Booking
 
@@ -29,16 +31,19 @@ def index(request):
         selected_date = max_date
     
     session_times = {
-        1: ("09:00", "12:00"),
-        2: ("12:00", "15:00"),
-        3: ("15:00", "18:00"),
+        1: ("09:00", "10:00"),
+        2: ("10:00", "11:00"),
+        3: ("11:00", "12:00"),
+        4: ("13:00", "14:00"),
+        5: ("14:00", "15:00"),
+        6: ("15:00", "16:00"),
     }
 
     for room in rooms:
         room.sessions = []  # attach sessions to room
         for session_id, (start_str, end_str) in session_times.items():
-            start_time = datetime.combine(today, datetime.strptime(start_str, "%H:%M").time())
-            end_time = datetime.combine(today, datetime.strptime(end_str, "%H:%M").time())
+            start_time = datetime.combine(selected_date, datetime.strptime(start_str, "%H:%M").time())
+            end_time = datetime.combine(selected_date, datetime.strptime(end_str, "%H:%M").time())
 
             is_booked = Booking.objects.filter(
                 room=room, start_time=start_time, end_time=end_time
@@ -50,7 +55,7 @@ def index(request):
                 "is_booked": is_booked,
             })
 
-    # booking handler
+    # booking
     if request.method == "POST":
         room_id = request.POST.get("room_id")
         date_str = request.POST.get("date")
@@ -58,22 +63,21 @@ def index(request):
 
         room = get_object_or_404(Room, id=room_id)
         date = datetime.strptime(date_str, "%Y-%m-%d").date()
-        
-        if date == today and now > end_time:
-            return redirect("booking:index")
 
         if date < today or date > max_date:
-            return redirect("booking:index")
+            messages.error(request, "Invalid booking date.")
+            return redirect(f"{reverse('booking:index')}?date={date}")
 
         start_str, end_str = session_times[session]
         start_time = datetime.combine(date, datetime.strptime(start_str, "%H:%M").time())
         end_time = datetime.combine(date, datetime.strptime(end_str, "%H:%M").time())
 
         if Booking.objects.filter(room=room, start_time=start_time, end_time=end_time).exists():
-            return redirect("booking:index")
+            return redirect(f"{reverse('booking:index')}?date={date}")
 
         Booking.objects.create(user=request.user, room=room, start_time=start_time, end_time=end_time)
-        return redirect("booking:index")
+        messages.success(request, f"Your booking for {room.name} on {date} at {start_str} – {end_str} is confirmed!")
+        return redirect(f"{reverse('booking:index')}?date={date}")
 
     return render(request, "index.html", {
         "rooms": rooms,
@@ -93,12 +97,16 @@ def login_view(request):
 
 @login_required
 def my_bookings(request):
-    bookings = Booking.objects.filter(user=request.user).order_by("-start_time")
+    bookings = Booking.objects.filter(user=request.user).order_by("start_time")
+    if request.method == "POST":
+        booking_id = request.POST.get("booking_id")
+        booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+        date_str = booking.start_time.strftime("%Y-%m-%d")
+        time_str = f"{booking.start_time.strftime('%H:%M')} – {booking.end_time.strftime('%H:%M')}"
+        
+        booking.delete()
+        messages.success(request, f"Your booking on {date_str} at {time_str} has been cancelled.")
+
+        return render(request, "my_bookings.html", {"bookings": bookings})
     return render(request, "my_bookings.html", {"bookings": bookings})
 
-
-@login_required
-def cancel_booking(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
-    booking.delete()
-    return redirect("booking:my_bookings")
