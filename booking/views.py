@@ -30,9 +30,12 @@ def index(request):
         selected_date = max_date
     
     session_times = {
-        1: ("09:00", "12:00"),
-        2: ("12:00", "15:00"),
-        3: ("15:00", "18:00"),
+        1: ("09:00", "10:00"),
+        2: ("10:00", "11:00"),
+        3: ("11:00", "12:00"),
+        4: ("13:00", "14:00"),
+        5: ("14:00", "15:00"),
+        6: ("15:00", "16:00"),
     }
 
     for room in rooms:
@@ -86,7 +89,7 @@ def index(request):
 
 @login_required
 def my_bookings(request):
-    bookings = Booking.objects.filter(user=request.user).order_by("-start_time")
+    bookings = Booking.objects.filter(user=request.user).order_by("start_time")
     if request.method == "POST":
         booking_id = request.POST.get("booking_id")
         booking = get_object_or_404(Booking, id=booking_id, user=request.user)
