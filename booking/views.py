@@ -1,13 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm , AuthenticationForm
 from django.contrib import messages
 from django.utils import timezone
 from django.urls import reverse
 from datetime import datetime, timedelta
 from .models import Room, Booking
 
-
+@login_required
 def index(request):
     rooms = Room.objects.all().order_by("number")
     now = timezone.localtime()
@@ -87,13 +87,19 @@ def index(request):
     })
 
 
-#def authView(request):
-    form = UserCreationForm
-    return render(request, "registration/signup.html", {"form" : UserCreationForm})
+def authView(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST or None)
+        if form.is_valid():
+            form.save()
+            return redirect("booking:login")
+    else:
+        form = UserCreationForm()
+    return render(request, "registration/signup.html", {"form" : form})
 
-def login_view(request):
-    form = AuthenticationForm()
-    return render(request, "registration/signup.html", {"form": form})
+ #def login_view(request):
+    #form = AuthenticationForm()
+    #return render(request, "registration/signup.html", {"form": form})
 
 @login_required
 def my_bookings(request):
@@ -109,4 +115,3 @@ def my_bookings(request):
 
         return render(request, "my_bookings.html", {"bookings": bookings})
     return render(request, "my_bookings.html", {"bookings": bookings})
-
