@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
 from django.utils import timezone
 from datetime import datetime, timedelta
 from .models import Room, Booking
@@ -82,6 +83,13 @@ def index(request):
     })
 
 
+#def authView(request):
+    form = UserCreationForm
+    return render(request, "registration/signup.html", {"form" : UserCreationForm})
+
+def login_view(request):
+    form = AuthenticationForm()
+    return render(request, "registration/signup.html", {"form": form})
 
 @login_required
 def my_bookings(request):
