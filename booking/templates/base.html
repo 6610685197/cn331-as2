@@ -15,9 +15,15 @@
             <h1 class="text-2xl font-bold">Thammasat University - Faculty of Engineering</h1>
             <nav>
                 <a href="{% url 'booking:index' %}" class="px-4 hover:underline">Home</a>
+                {% if user.is_authenticated %}
                 <a href="{% url 'booking:my-bookings' %}" class="px-4 hover:underline">My Bookings</a>
-
-
+                <form method="post" action="{% url 'booking:logout' %}" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="px-4 hover:underline">Logout</button>
+                </form>
+                {% else %}
+                <a href="{% url 'booking:login' %}" class="px-4 hover:underline">Login</a>
+                {% endif %}
             </nav>
         </div>
     </header>

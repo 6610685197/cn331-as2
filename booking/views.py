@@ -1,17 +1,18 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm , AuthenticationForm
 from django.contrib import messages
 from django.utils import timezone
 from django.urls import reverse
 from datetime import datetime, timedelta
 from .models import Room, Booking
 
-
 def index(request):
     rooms = Room.objects.all().order_by("number")
     now = timezone.localtime()
     today = timezone.localdate()
     max_date = today + timedelta(days=7)
+    is_open = Room.is_open
 
     # selected date (default: today)
     date_str = request.GET.get("date")
@@ -40,6 +41,12 @@ def index(request):
 
     for room in rooms:
         room.sessions = []  # attach sessions to room
+        
+        if not room.is_open:
+            # Skip session creation if room is closed
+            room.is_closed = True
+            continue
+    
         for session_id, (start_str, end_str) in session_times.items():
             start_time = datetime.combine(selected_date, datetime.strptime(start_str, "%H:%M").time())
             end_time = datetime.combine(selected_date, datetime.strptime(end_str, "%H:%M").time())
@@ -86,8 +93,21 @@ def index(request):
     })
 
 
+def authView(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST or None)
+        if form.is_valid():
+            form.save()
+            return redirect("booking:login")
+    else:
+        form = UserCreationForm()
+    return render(request, "registration/signup.html", {"form" : form})
 
-@login_required
+ #def login_view(request):
+    #form = AuthenticationForm()
+    #return render(request, "registration/signup.html", {"form": form})
+
+@login_required(login_url='booking:login')
 def my_bookings(request):
     bookings = Booking.objects.filter(user=request.user).order_by("start_time")
     if request.method == "POST":
@@ -101,4 +121,3 @@ def my_bookings(request):
 
         return render(request, "my_bookings.html", {"bookings": bookings})
     return render(request, "my_bookings.html", {"bookings": bookings})
-
