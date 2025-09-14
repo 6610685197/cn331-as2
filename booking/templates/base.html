@@ -12,12 +12,13 @@
     <!-- Header / Navbar -->
     <header class="bg-red-700 text-white p-6 shadow-md">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold">Thammasat University - Faculty of Engineering</h1>
+            <h1 class="text-2xl font-bold">Thammasat University</h1>
             <nav>
                 <a href="{% url 'booking:index' %}" class="px-4 hover:underline">Home</a>
                 {% if user.is_authenticated %}
                     {% if user.is_staff %}
                     <a href="{% url 'booking:admin_dashboard' %}" class="px-4 hover:underline">Admin dashboard</a>
+                    <a href="{% url 'admin:index' %}" class="px-4 hover:underline">Admin interface</a>
                     {% endif %}
                 <a href="{% url 'booking:my-bookings' %}" class="px-4 hover:underline">My Bookings</a>
                 <form method="post" action="{% url 'booking:logout' %}" class="inline">
