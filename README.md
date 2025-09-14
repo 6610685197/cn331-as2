@@ -24,4 +24,6 @@
 	+ Edit room status (Open/closed)
 	+ Delete bookings made by user
 
+### Link video
+https://drive.google.com/file/d/1nLL7Kuf4xAYY0GmTNUzN5azg2z1qT59G/view?usp=sharing
 
