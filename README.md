@@ -22,7 +22,12 @@
 	+ Cancel button for each booking
 - Admin dashboard (Login with superuser)
 	+ Edit room status (Open/closed)
+	+ View all bookings made by user
 	+ Delete bookings made by user
+- Django's Admin interface
+	+ Add room and edit detail (name, number, capacity and status)
+	+ View all bookings made by user
+	+ View all user detail
 
 ### Link video
 https://drive.google.com/file/d/1nLL7Kuf4xAYY0GmTNUzN5azg2z1qT59G/view?usp=sharing
