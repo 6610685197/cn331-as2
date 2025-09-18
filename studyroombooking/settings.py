@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,10 +25,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-ox9o&0qos-@c^pph_ln&7ebl4o*7gp4w1np82j(#l=olxwos2u"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
+STATIC_URL ='static/'
+STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles')
+STATICFILES_STORAGE ='whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Application definition
 
@@ -49,6 +54,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    
 ]
 
 ROOT_URLCONF = "studyroombooking.urls"
@@ -75,10 +82,14 @@ WSGI_APPLICATION = "studyroombooking.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+if not os.environ.get('DEBUG', 'False') == 'True':
+    DATABASES ={'default': dj_database_url.parse(os.environ.get('postgresql://roombooking_lkny_user:d8PdPD4qXnXIURxRO1gG5jVVlOHQvyB9@dpg-d360c6jipnbc739sgvog-a/roombooking_lkny'))
+}
+else:
+    DATABASES ={
+    'default': {
+    'ENGINE': 'django.db.backends.sqlite3',
+    'NAME': 'db.sqlite3',
     }
 }
 
