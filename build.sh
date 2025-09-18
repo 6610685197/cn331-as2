@@ -6,4 +6,7 @@ pip install --upgrade pip
 pip install -r requirements.txt
 python manage.py collectstatic --no-input
 python manage.py migrate
-python manage.py createsuperuser --username admin --email "your@email.com" --noinput || true
+DJANGO_SUPERUSER_USERNAME=admin \
+DJANGO_SUPERUSER_EMAIL=admin@email.com \
+DJANGO_SUPERUSER_PASSWORD=1234 \
+python manage.py createsuperuser --noinput || true
