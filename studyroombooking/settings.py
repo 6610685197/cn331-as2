@@ -83,7 +83,7 @@ WSGI_APPLICATION = "studyroombooking.wsgi.application"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 if not os.environ.get('DEBUG', 'False') == 'True':
-    DATABASES ={'default': dj_database_url.parse(os.environ.get('postgresql://roombooking_lkny_user:d8PdPD4qXnXIURxRO1gG5jVVlOHQvyB9@dpg-d360c6jipnbc739sgvog-a/roombooking_lkny'))
+    DATABASES ={'default': dj_database_url.parse('postgresql://roombooking_lkny_user:d8PdPD4qXnXIURxRO1gG5jVVlOHQvyB9@dpg-d360c6jipnbc739sgvog-a/roombooking_lkny')
 }
 else:
     DATABASES ={
